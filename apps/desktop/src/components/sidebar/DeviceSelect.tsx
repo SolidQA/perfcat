@@ -45,12 +45,6 @@ export function DeviceSelect({
 
   return (
     <div className="space-y-2">
-      {selectedDevice ? (
-        <div className="text-xs text-muted-foreground">
-          {selectedDevice.model ?? "未知"} · {selectedDevice.state}
-        </div>
-      ) : null}
-
       <Popover
         open={open}
         onOpenChange={(newOpen) => {

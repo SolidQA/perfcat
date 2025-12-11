@@ -1,15 +1,18 @@
-import { Sidebar } from "@/components/sidebar"
+import { HeaderBar } from "@/components/header"
 import { useAdbApps } from "@/hooks/useAdbApps"
 import { useAdbDevices } from "@/hooks/useAdbDevices"
 import { useAdbMetrics } from "@/hooks/useAdbMetrics"
 import type { MetricKey } from "@/types/adb"
 import { ChartList, ChartItem } from "@/components/charts/ChartList"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useAppStore } from "@/stores/use-app-store"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function HomePage() {
   const [selectedDevice, setSelectedDevice] = useState("")
   const [selectedApp, setSelectedApp] = useState("")
   const [selectedMetrics, setSelectedMetrics] = useState<MetricKey[]>(["cpu", "memory"])
+  const { setSelectedDevice: setSelectedDeviceInStore } = useAppStore()
 
   const {
     devices,
@@ -110,9 +113,15 @@ export function HomePage() {
 
   const chartData = useMemo(() => history, [history])
 
+  // 同步所选设备信息到全局，以便标题栏展示
+  useEffect(() => {
+    const device = devices.find((item) => item.id === selectedDevice) ?? null
+    setSelectedDeviceInStore(device)
+  }, [devices, selectedDevice, setSelectedDeviceInStore])
+
   return (
-    <div className="flex flex-1 overflow-hidden">
-      <Sidebar
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <HeaderBar
         deviceId={selectedDevice}
         devices={devices}
         deviceSearch={deviceSearch}
@@ -138,57 +147,65 @@ export function HomePage() {
         onStop={stop}
       />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-3">
-        <ChartList initialBrush={{ start: 0, end: 100 }}>
-          {selectedMetrics.includes("cpu") && (
-            <ChartItem
-              title="CPU (%)"
-              data={chartData}
-              xKey="second"
-              yDomain={[0, 100]}
-              height={224}
-              lines={[{ dataKey: "cpu", label: "CPU", color: "hsl(217, 91%, 60%)" }]}
-            />
-          )}
-          {selectedMetrics.includes("fps") && (
-            <ChartItem
-              title="FPS"
-              data={chartData}
-              xKey="second"
-              yDomain={[0, 120]}
-              height={224}
-              lines={[{ dataKey: "fps", label: "FPS", color: "hsl(291, 64%, 42%)" }]}
-            />
-          )}
-          {selectedMetrics.includes("power") && (
-            <ChartItem
-              title="耗能 (mA)"
-              data={chartData}
-              xKey="second"
-              height={224}
-              lines={[{ dataKey: "power", label: "功耗", color: "hsl(16, 90%, 55%)" }]}
-            />
-          )}
-          {selectedMetrics.includes("memory") && (
-            <ChartItem
-              title="内存 (MB)"
-              data={chartData}
-              xKey="second"
-              height={224}
-              lines={[{ dataKey: "memory", label: "内存", color: "hsl(200, 80%, 45%)" }]}
-            />
-          )}
-          {selectedMetrics.includes("network") && (
-            <ChartItem
-              title="网络 (KB)"
-              data={chartData}
-              xKey="second"
-              height={224}
-              lines={[{ dataKey: "network", label: "网络", color: "hsl(120, 70%, 40%)" }]}
-            />
-          )}
-        </ChartList>
-
+      <main className="flex-1 overflow-hidden min-h-0">
+        <ScrollArea className="h-full">
+          <div className="p-4">
+            <ChartList initialBrush={{ start: 0, end: 100 }}>
+              {selectedMetrics.includes("cpu") && (
+                <ChartItem
+                  key="cpu"
+                  title="CPU (%)"
+                  data={chartData}
+                  xKey="second"
+                  yDomain={[0, 100]}
+                  height={224}
+                  lines={[{ dataKey: "cpu", label: "CPU", color: "hsl(217, 91%, 60%)" }]}
+                />
+              )}
+              {selectedMetrics.includes("fps") && (
+                <ChartItem
+                  key="fps"
+                  title="FPS"
+                  data={chartData}
+                  xKey="second"
+                  yDomain={[0, 120]}
+                  height={224}
+                  lines={[{ dataKey: "fps", label: "FPS", color: "hsl(291, 64%, 42%)" }]}
+                />
+              )}
+              {selectedMetrics.includes("power") && (
+                <ChartItem
+                  key="power"
+                  title="耗能 (mA)"
+                  data={chartData}
+                  xKey="second"
+                  height={224}
+                  lines={[{ dataKey: "power", label: "功耗", color: "hsl(16, 90%, 55%)" }]}
+                />
+              )}
+              {selectedMetrics.includes("memory") && (
+                <ChartItem
+                  key="memory"
+                  title="内存 (MB)"
+                  data={chartData}
+                  xKey="second"
+                  height={224}
+                  lines={[{ dataKey: "memory", label: "内存", color: "hsl(200, 80%, 45%)" }]}
+                />
+              )}
+              {selectedMetrics.includes("network") && (
+                <ChartItem
+                  key="network"
+                  title="网络 (KB)"
+                  data={chartData}
+                  xKey="second"
+                  height={224}
+                  lines={[{ dataKey: "network", label: "网络", color: "hsl(120, 70%, 40%)" }]}
+                />
+              )}
+            </ChartList>
+          </div>
+        </ScrollArea>
       </main>
     </div>
   )

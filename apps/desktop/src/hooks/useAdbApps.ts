@@ -33,7 +33,11 @@ export function useAdbApps(deviceId: string | null) {
   const filtered = useMemo(() => {
     if (!search.trim()) return apps
     const keyword = search.toLowerCase()
-    return apps.filter((app) => app.package.toLowerCase().includes(keyword))
+    return apps.filter((app) => {
+      const pkgHit = app.package.toLowerCase().includes(keyword)
+      const labelHit = app.label?.toLowerCase().includes(keyword)
+      return pkgHit || labelHit
+    })
   }, [apps, search])
 
   return {

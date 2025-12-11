@@ -23,6 +23,8 @@ pub struct AppInfo {
   pub package: String,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub label: Option<String>,
+  #[serde(default)]
+  pub is_system: bool,
 }
 
 

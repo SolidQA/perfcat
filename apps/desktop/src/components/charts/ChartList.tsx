@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import {
   createContext,
   useCallback,
@@ -7,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import {
   ChartContainer,
   ChartLegend,
@@ -42,7 +44,7 @@ export function ChartList({
   initialBrush,
   onDraggingChange,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   initialBrush?: BrushState
   onDraggingChange?: (dragging: boolean) => void
 }) {
@@ -55,7 +57,35 @@ export function ChartList({
 
   const value = useMemo(() => ({ brush, setBrush, dragging, setDragging }), [brush, dragging])
 
-  return <ChartListContext.Provider value={value}>{children}</ChartListContext.Provider>
+  const childArray = useMemo(
+    () => (Array.isArray(children) ? children : [children]).filter(Boolean) as ReactNode[],
+    [children]
+  )
+
+  return (
+    <ChartListContext.Provider value={value}>
+      <div className="space-y-3">
+        <AnimatePresence mode="popLayout">
+          {childArray.map((child, index) => (
+            <motion.div
+              key={(child as any)?.key ?? index}
+              layout
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut",
+                layout: { duration: 0.25, ease: "easeInOut" },
+              }}
+            >
+              {child}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </ChartListContext.Provider>
+  )
 }
 
 type LineConfig = {
@@ -168,7 +198,7 @@ export function ChartItem({
             <Area
               key={line.dataKey}
               dataKey={line.dataKey}
-              type="monotone"
+              type="linear"
               stroke={`var(--color-${line.dataKey})`}
               fill={`var(--color-${line.dataKey})`}
               fillOpacity={0.2}

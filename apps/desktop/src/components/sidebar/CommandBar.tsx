@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Plus } from "lucide-react"
+import { Play, Square, Settings } from "lucide-react"
 import { useRef } from "react"
 
 interface Props {
@@ -16,42 +16,42 @@ interface Props {
 }
 
 export function CommandBar({ disabled, running, onStart, onStop, metricSelector }: Props) {
-  const groupRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   return (
-    <div className="w-full">
-      <div
-        ref={groupRef}
-        className="inline-flex w-full items-stretch overflow-hidden rounded-md border bg-card"
-      >
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="default"
-              disabled={running}
-              className="rounded-none border-r px-3"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="p-3"
-            align="start"
-            style={{ width: groupRef.current?.offsetWidth || "16rem" }}
+    <div className="flex items-center justify-end gap-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            ref={triggerRef}
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            disabled={running}
+            aria-label="选择性能指标"
           >
-            {metricSelector ?? <div className="text-sm text-muted-foreground">请选择性能参数</div>}
-          </PopoverContent>
-        </Popover>
-
-        <Button
-          className="flex-1 rounded-none"
-          onClick={running ? onStop : onStart}
-          disabled={disabled}
+            <Settings className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="p-3"
+          align="end"
+          style={{ width: triggerRef.current?.offsetWidth ? triggerRef.current.offsetWidth * 3 : 240 }}
         >
-          {running ? "停止" : "开始监控"}
-        </Button>
-      </div>
+          {metricSelector ?? <div className="text-sm text-muted-foreground">请选择性能参数</div>}
+        </PopoverContent>
+      </Popover>
+
+      <Button
+        variant={running ? "destructive" : "default"}
+        size="icon"
+        className="rounded-full"
+        onClick={running ? onStop : onStart}
+        disabled={disabled}
+        aria-label={running ? "停止监控" : "开始监控"}
+      >
+        {running ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+      </Button>
     </div>
   )
 }

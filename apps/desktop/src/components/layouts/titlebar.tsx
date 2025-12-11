@@ -9,7 +9,7 @@ const appWindow = getCurrentWindow()
 
 export function TitleBar() {
   const [platform, setPlatform] = useState<"macos" | "windows" | "linux">("macos")
-  const { theme, setTheme } = useAppStore()
+  const { theme, setTheme, selectedDevice } = useAppStore()
 
   useEffect(() => {
     getPlatform().then(setPlatform)
@@ -39,6 +39,18 @@ export function TitleBar() {
   const isMacOS = platform === "macos"
   const isWindows = platform === "windows"
 
+  const deviceStateClass = (() => {
+    if (!selectedDevice) return "bg-muted"
+    const state = selectedDevice.state.toLowerCase()
+    if (state.includes("offline") || state.includes("unauthorized")) return "bg-destructive"
+    if (state.includes("online") || state.includes("device")) return "bg-emerald-500"
+    return "bg-amber-500"
+  })()
+
+  const deviceLabel = selectedDevice
+    ? selectedDevice.model ?? selectedDevice.id
+    : "未选择设备"
+
   return (
     <div
       data-tauri-drag-region
@@ -48,12 +60,19 @@ export function TitleBar() {
       {isMacOS && <div data-tauri-drag-region className="w-[70px]" />}
 
       {/* 中间：应用名称 - 整个区域可拖动 */}
-      <div data-tauri-drag-region className="flex flex-1 items-center pl-4">
-        <span className="text-sm font-semibold pointer-events-none">PerfCat</span>
+      <div data-tauri-drag-region className="flex flex-1 items-center gap-3 pl-4 pr-2">
+        <span className="text-sm font-semibold pointer-events-none select-none">PerfCat</span>
+        <div className="pointer-events-none select-none flex items-center gap-2 rounded-full bg-muted/60 px-2 py-1">
+          <span className={`h-2.5 w-2.5 rounded-full ${deviceStateClass}`} />
+          <span className="text-xs text-foreground/80">
+            {deviceLabel}
+            {selectedDevice ? ` · ${selectedDevice.state}` : ""}
+          </span>
+        </div>
       </div>
 
       {/* 右侧：操作按钮和 Windows 窗口控制按钮 */}
-      <div className="flex items-center gap-1.5 pr-2">
+      <div className="flex items-center gap-1.5 pr-2" data-tauri-drag-region="no-drag">
         <Button
           variant="ghost"
           size="icon-sm"

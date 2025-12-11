@@ -43,6 +43,8 @@ export function AppSelect({
   const triggerRef = useRef<HTMLButtonElement>(null)
 
   const selectedApp = apps.find(app => app.package === value)
+  const installedApps = apps.filter((app) => !app.is_system)
+  const systemApps = apps.filter((app) => app.is_system)
 
   return (
     <Popover
@@ -103,25 +105,51 @@ export function AppSelect({
               ) : apps.length === 0 ? (
                 <CommandEmpty>未找到应用</CommandEmpty>
               ) : (
-                <CommandGroup>
-                  {apps.map((app) => (
-                    <CommandItem
-                      key={app.package}
-                      value={app.package}
-                      onSelect={() => {
-                        onChange(app.package)
-                        setOpen(false)
-                      }}
-                    >
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="font-medium truncate" title={app.package}>{app.package}</span>
-                        {app.label ? (
-                          <span className="text-xs text-muted-foreground truncate" title={app.label}>{app.label}</span>
-                        ) : null}
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                <>
+                  {installedApps.length > 0 && (
+                    <CommandGroup heading="安装应用">
+                      {installedApps.map((app) => (
+                        <CommandItem
+                          key={app.package}
+                          value={app.package}
+                          onSelect={() => {
+                            onChange(app.package)
+                            setOpen(false)
+                          }}
+                        >
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="font-medium truncate" title={app.package}>{app.package}</span>
+                            {app.label ? (
+                              <span className="text-xs text-muted-foreground truncate" title={app.label}>{app.label}</span>
+                            ) : null}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+
+                  {systemApps.length > 0 && (
+                    <CommandGroup heading="系统应用">
+                      {systemApps.map((app) => (
+                        <CommandItem
+                          key={app.package}
+                          value={app.package}
+                          onSelect={() => {
+                            onChange(app.package)
+                            setOpen(false)
+                          }}
+                        >
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="font-medium truncate" title={app.package}>{app.package}</span>
+                            {app.label ? (
+                              <span className="text-xs text-muted-foreground truncate" title={app.label}>{app.label}</span>
+                            ) : null}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </>
               )}
             </CommandList>
           </Command>

@@ -9,6 +9,10 @@ export interface AdbDevice {
 export interface AdbApp {
   package: string
   label?: string | null
+  /**
+   * 是否为系统应用（来自 pm list packages -s）
+   */
+  is_system?: boolean
 }
 
 export interface FrameStats {
