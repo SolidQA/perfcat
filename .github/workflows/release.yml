@@ -102,6 +102,7 @@ jobs:
           tag_name: v${{ needs.prepare.outputs.version }}
           name: v${{ needs.prepare.outputs.version }}
           files: |
-            dist/macos/deskapp*.dmg
-            dist/windows/deskapp*.exe
-            dist/windows/deskapp*.msi
+            dist/macos/**/*.dmg
+            dist/macos/**/*.app
+            dist/windows/**/*.exe
+            dist/windows/**/*.msi
