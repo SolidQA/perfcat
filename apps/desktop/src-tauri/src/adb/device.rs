@@ -1,6 +1,6 @@
 use crate::adb::{
   command::run_host,
-  error::{AdbError, Result},
+  error::Result,
   DeviceInfo,
 };
 

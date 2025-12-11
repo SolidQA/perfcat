@@ -21,10 +21,25 @@ pub struct MetricsPayload {
 
 #[tauri::command]
 pub async fn tauri_list_devices() -> Result<Vec<DeviceInfo>, String> {
-  spawn_blocking(|| list_devices())
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|e| e.to_string())
+  spawn_blocking(|| {
+    match list_devices() {
+      Ok(devices) => {
+        println!("ADB设备搜索成功，找到 {} 个设备", devices.len());
+        for device in &devices {
+          println!("设备: {} (状态: {}, 型号: {:?})", device.id, device.state, device.model);
+        }
+        Ok(devices)
+      }
+      Err(e) => {
+        println!("ADB设备搜索失败: {:?}", e);
+        println!("当前ADB路径: {}", crate::adb::command::current_adb_path());
+        Err(e)
+      }
+    }
+  })
+  .await
+  .map_err(|e| format!("异步执行错误: {}", e.to_string()))?
+  .map_err(|e| format!("ADB错误: {}", e.to_string()))
 }
 
 #[tauri::command]

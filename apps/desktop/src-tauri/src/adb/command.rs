@@ -22,12 +22,52 @@ pub fn set_adb_path(path: Option<String>) {
   }
 }
 
-fn current_adb_path() -> String {
-  adb_bin()
-    .lock()
-    .ok()
-    .and_then(|cfg| cfg.path.clone())
-    .unwrap_or_else(|| "adb".to_string())
+pub fn current_adb_path() -> String {
+  // 首先检查手动设置的路径
+  if let Some(path) = adb_bin().lock().ok().and_then(|cfg| cfg.path.clone()) {
+    return path;
+  }
+
+  // 尝试自动查找ADB路径
+  if let Ok(path) = find_adb_path() {
+    return path;
+  }
+
+  // 默认使用adb命令
+  "adb".to_string()
+}
+
+fn find_adb_path() -> Result<String> {
+  // 常见的ADB安装路径
+  let possible_paths = [
+    "/usr/local/bin/adb",
+    "/opt/homebrew/bin/adb",
+    "/usr/bin/adb",
+    "/bin/adb",
+    // Android Studio默认路径
+    "/Users/caishilong/Library/Android/sdk/platform-tools/adb",
+    "/Users/caishilong/Android/Sdk/platform-tools/adb",
+    // 系统PATH中的adb
+  ];
+
+  for path in &possible_paths {
+    if std::path::Path::new(path).exists() {
+      return Ok(path.to_string());
+    }
+  }
+
+  // 最后尝试which命令
+  match Command::new("which").arg("adb").output() {
+    Ok(output) if output.status.success() => {
+      let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+      if !path.is_empty() {
+        Ok(path)
+      } else {
+        Err(AdbError::NotFound)
+      }
+    }
+    _ => Err(AdbError::NotFound),
+  }
 }
 
 pub fn run_host(args: &[&str]) -> Result<String> {
@@ -43,12 +83,19 @@ pub fn run_device(device_id: &str, args: &[&str]) -> Result<String> {
 }
 
 fn run_raw(bin: &str, args: &[&str]) -> Result<String> {
-  let output = Command::new(bin)
-    .args(args)
+  let mut cmd = Command::new(bin);
+  cmd.args(args)
     .stdout(Stdio::piped())
-    .stderr(Stdio::piped())
-    .output()
-    .map_err(|_| AdbError::NotFound)?;
+    .stderr(Stdio::piped());
+
+  // 在Windows上避免弹出命令窗口
+  #[cfg(target_os = "windows")]
+  {
+    use std::os::windows::process::CommandExt;
+    cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+  }
+
+  let output = cmd.output().map_err(|_| AdbError::NotFound)?;
 
   if !output.status.success() {
     let err = String::from_utf8_lossy(&output.stderr).trim().to_string();
@@ -58,6 +105,7 @@ fn run_raw(bin: &str, args: &[&str]) -> Result<String> {
   Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
+#[allow(dead_code)]
 pub fn try_ping_server() -> Result<()> {
   let _ = run_host(&["start-server"]).map_err(|e| AdbError::Client(format!("{e}")))?;
   Ok(())

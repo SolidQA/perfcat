@@ -3,6 +3,9 @@ name: release
 on:
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -44,8 +47,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -61,9 +62,12 @@ jobs:
         env:
           TAURI_BUILD_VERSION: ${{ env.VERSION }}
           TAURI_BUILD_NUMBER: ${{ github.run_number }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          # 注释掉签名相关环境变量，因为还没有证书
+          # TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          # TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 禁用签名以避免错误
+          TAURI_SKIP_SIGNING: true
         run: pnpm tauri build
 
       - name: Upload artifacts

@@ -205,7 +205,7 @@ fn fetch_fps(device_id: &str, package: &str) -> Result<FrameStats> {
 
   // 计算FPS（基于历史数据）
   let key = format!("{}:{}", device_id, package);
-  let fps = if let Ok(mut history) = FPS_HISTORY.lock() {
+  let fps = if let Ok(history) = FPS_HISTORY.lock() {
     if let Some(prev) = history.get(&key) {
       let time_diff_sec = (now - prev.timestamp) as f64 / 1000.0;
       if time_diff_sec > 0.1 { // 至少间隔100ms

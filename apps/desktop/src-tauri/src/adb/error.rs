@@ -9,6 +9,7 @@ pub enum AdbError {
   #[error("ADB 输出解析失败: {0}")]
   ParseFailed(String),
   #[error("ADB 客户端错误: {0}")]
+  #[allow(dead_code)]
   Client(String),
 }
 
