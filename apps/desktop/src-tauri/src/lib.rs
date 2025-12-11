@@ -2,7 +2,7 @@ mod adb;
 mod commands;
 
 use crate::adb::set_bundled_adb_path;
-use std::path::PathBuf;
+use std::{env, path::PathBuf};
 use tauri::{path::BaseDirectory, Manager};
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 
@@ -54,30 +54,51 @@ pub fn run() {
         let resolver = app.path();
 
         #[cfg(target_os = "macos")]
-        let adb_relative_path = "adb/adb";
+        let adb_relative_path = PathBuf::from("adb").join("adb");
         #[cfg(target_os = "windows")]
-        let adb_relative_path = "adb/adb.exe";
+        let adb_relative_path = PathBuf::from("adb").join("adb.exe");
         #[cfg(target_os = "linux")]
-        let adb_relative_path = "adb/adb";
+        let adb_relative_path = PathBuf::from("adb").join("adb");
 
-        let resolved_path = resolver
-          .resolve(adb_relative_path, BaseDirectory::Resource)
+        let mut resolved_path = resolver
+          .resolve(&adb_relative_path, BaseDirectory::Resource)
           .ok()
-          .filter(|p| p.exists())
-          .or_else(|| {
-            let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-            path.push("resources");
-            path.push(adb_relative_path);
-            if path.exists() {
-              Some(path)
-            } else {
-              None
+          .filter(|p| p.exists());
+
+        if resolved_path.is_none() {
+          if let Ok(resource_dir) = resolver.resource_dir() {
+            let candidate = resource_dir.join(&adb_relative_path);
+            if candidate.exists() {
+              resolved_path = Some(candidate);
             }
-          });
+          }
+        }
+
+        if resolved_path.is_none() {
+          if let Ok(exe) = env::current_exe() {
+            if let Some(parent) = exe.parent() {
+              let candidate = parent.join("resources").join(&adb_relative_path);
+              if candidate.exists() {
+                resolved_path = Some(candidate);
+              }
+            }
+          }
+        }
+
+        if resolved_path.is_none() {
+          let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+          path.push("resources");
+          path.push(&adb_relative_path);
+          if path.exists() {
+            resolved_path = Some(path);
+          }
+        }
 
         if let Some(path) = resolved_path {
           log::info!("Bundled ADB path resolved: {}", path.display());
           set_bundled_adb_path(Some(path.to_string_lossy().to_string()));
+        } else {
+          log::error!("Bundled ADB not found. Looked for {}", adb_relative_path.display());
         }
       }
 
