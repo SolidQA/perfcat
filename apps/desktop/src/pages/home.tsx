@@ -1,16 +1,13 @@
 import { TabbedHeader } from "@/components/header"
-import { FloatingButtonGroup } from "@/components/floating-button-group"
 import { PerfPage } from "@/pages/perf-page"
 import { DeviceInfoPage } from "@/pages/device-info-page"
 import { ReportPage } from "@/pages/report-page"
-import { useMonitoring } from "@/hooks/features/monitoring/useMonitoring"
 import { useDeviceEffects } from "@/hooks/effects/useDeviceEffects"
 import { useAppStore } from "@/stores/use-app-store"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 
 export function HomePage() {
   const { activeTab, setActiveTab } = useAppStore()
-  const { handleStart, handleStop, running } = useMonitoring()
 
   // 处理设备变化副作用
   useDeviceEffects()
@@ -35,9 +32,6 @@ export function HomePage() {
         </Tabs>
       </main>
 
-      {activeTab === "performance" && (
-        <FloatingButtonGroup onStart={handleStart} onStop={handleStop} running={running} />
-      )}
     </div>
   )
 }

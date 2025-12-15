@@ -8,7 +8,7 @@ import { useAdbApps } from "@/hooks/queries/useAdbApps"
 import { useMonitoring } from "@/hooks/features/monitoring/useMonitoring"
 import { AppSelect } from "@/components/sidebar/AppSelect"
 import { MetricSelector } from "@/components/sidebar/MetricSelector"
-import { Cpu, Gauge, Zap, Database, ArrowUpDown, Smartphone, Play, Square, Settings } from "lucide-react"
+import { Cpu, Gauge, Zap, Database, ArrowUpDown, AppWindow, Play, Square, Settings } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
 export function PerfPage() {
@@ -41,9 +41,9 @@ export function PerfPage() {
   return (
     <div className="h-full flex flex-col">
       {/* 当前测试应用信息和控制按钮 */}
-      <div className="flex items-center justify-between p-4 pb-2 border-b bg-background">
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30 dark:bg-muted/10">
         <div className="flex items-center gap-2">
-          <Smartphone size={14} className="text-muted-foreground" />
+          <AppWindow size={14} className="text-muted-foreground" />
           <span className="text-sm text-muted-foreground">测试应用:</span>
           <span className="text-sm font-medium">{appDisplayName}</span>
         </div>
@@ -56,10 +56,11 @@ export function PerfPage() {
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-8 w-8 rounded-full"
                 disabled={running}
                 aria-label="设置"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="h-3.5 w-3.5" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-96 p-6" align="end">
@@ -98,6 +99,7 @@ export function PerfPage() {
           <Button
             variant={running ? "destructive" : "default"}
             size="sm"
+            className="h-8 w-8 rounded-full"
             onClick={() => {
               if (running) {
                 handleStop()
@@ -108,7 +110,7 @@ export function PerfPage() {
             disabled={disabled}
             aria-label={running ? "停止监控" : "开始监控"}
           >
-            {running ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {running ? <Square className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
           </Button>
         </div>
       </div>
