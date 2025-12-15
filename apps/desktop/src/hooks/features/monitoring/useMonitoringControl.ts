@@ -1,4 +1,5 @@
 import { useCallback } from "react"
+import { toast } from "sonner"
 import { useAdbDevices } from "@/hooks/queries/useAdbDevices"
 import { useAdbApps } from "@/hooks/queries/useAdbApps"
 import { useCreateReport } from "@/hooks/mutations/useReports"
@@ -24,12 +25,34 @@ export function useMonitoringControl(
     useMonitoringStore()
 
   const handleStart = useCallback(() => {
-    if (!selectedDevice || !selectedApp || selectedMetrics.length === 0) {
-      console.warn("handleStart: 缺少必要参数", {
-        selectedDevice: !!selectedDevice,
-        selectedApp,
-        selectedMetrics,
-      })
+    // 检查设备是否已选择且连接正常
+    if (!selectedDevice) {
+      toast.error("请先选择一个设备")
+      return
+    }
+
+    // 检查设备状态是否为已连接
+    if (selectedDevice.state !== "device") {
+      toast.error("所选设备未连接，请检查设备状态")
+      return
+    }
+
+    // 检查应用是否已选择
+    if (!selectedApp || selectedApp.trim() === "") {
+      toast.error("请选择要监控的应用")
+      return
+    }
+
+    // 检查应用是否存在于当前设备上
+    const appExists = apps.some(app => app.package === selectedApp)
+    if (!appExists) {
+      toast.error("所选应用在当前设备上不存在，请重新选择")
+      return
+    }
+
+    // 检查是否选择了监控指标
+    if (selectedMetrics.length === 0) {
+      toast.error("请至少选择一个监控指标")
       return
     }
 
@@ -49,7 +72,7 @@ export function useMonitoringControl(
       metrics: metricsToRequest,
       intervalMs: 1000,
     })
-  }, [selectedDevice, selectedApp, selectedMetrics, start, setStartTime, setRunning])
+  }, [selectedDevice, selectedApp, selectedMetrics, start, setStartTime, setRunning, apps])
 
   const handleStop = useCallback(() => {
     stop()

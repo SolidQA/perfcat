@@ -21,6 +21,7 @@ export function ReportDetailPage({ reportId, onBack }: ReportDetailPageProps) {
   const { data: report, isLoading, error } = useReport(reportId)
   const pdfRef = useRef<HTMLDivElement>(null)
   const [exportingPDF, setExportingPDF] = useState(false)
+  const [exportingCSV, setExportingCSV] = useState(false)
 
   if (isLoading) {
     return (
@@ -78,11 +79,14 @@ export function ReportDetailPage({ reportId, onBack }: ReportDetailPageProps) {
       return
     }
     try {
+      setExportingCSV(true)
       await exportToCSV(chartData, report.name)
       toast.success("CSV导出成功")
     } catch (error) {
       console.error("导出CSV失败:", error)
       toast.error(`导出CSV失败: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setExportingCSV(false)
     }
   }
 
@@ -117,10 +121,10 @@ export function ReportDetailPage({ reportId, onBack }: ReportDetailPageProps) {
                 size="sm"
                 onClick={handleExportCSV}
                 className="gap-2"
-                disabled={chartData.length === 0}
+                disabled={exportingCSV || chartData.length === 0}
               >
                 <Download className="h-4 w-4" />
-                导出CSV
+                {exportingCSV ? "导出中..." : "导出CSV"}
               </Button>
               <Button
                 variant="outline"

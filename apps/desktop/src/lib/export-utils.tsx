@@ -182,16 +182,6 @@ export async function exportToPDF(element: HTMLElement, filename: string): Promi
     throw new Error("没有可导出的内容")
   }
 
-  // 隐藏不需要打印的元素
-  const noPrintElements = element.querySelectorAll(".no-print")
-  const originalDisplay: string[] = []
-  noPrintElements.forEach(el => {
-    if (el instanceof HTMLElement) {
-      originalDisplay.push(el.style.display)
-      el.style.display = "none"
-    }
-  })
-
   try {
     // 使用 html2canvas 将DOM转换为canvas
     const canvas = await html2canvas(element, {
@@ -204,7 +194,7 @@ export async function exportToPDF(element: HTMLElement, filename: string): Promi
         // 在克隆的文档中替换样式表中的 oklch 颜色
         replaceOklchInStylesheets(clonedDoc)
 
-        // 隐藏不需要打印的元素
+        // 隐藏不需要打印的元素（只在克隆文档中）
         const clonedNoPrint = clonedDoc.querySelectorAll(".no-print")
         clonedNoPrint.forEach(el => {
           if (el instanceof HTMLElement) {
@@ -274,12 +264,8 @@ export async function exportToPDF(element: HTMLElement, filename: string): Promi
     } else {
       throw new Error("用户取消了文件保存")
     }
-  } finally {
-    // 恢复不需要打印的元素的显示状态
-    noPrintElements.forEach((el, index) => {
-      if (el instanceof HTMLElement) {
-        el.style.display = originalDisplay[index] || ""
-      }
-    })
+  } catch (error) {
+    // 重新抛出错误，让调用方处理
+    throw error
   }
 }
