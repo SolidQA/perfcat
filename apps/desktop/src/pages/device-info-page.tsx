@@ -240,33 +240,6 @@ export function DeviceInfoPage() {
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>设备操作</CardTitle>
-              <CardDescription>对设备执行常用操作</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="text-center p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors">
-                  <div className="text-2xl mb-2">🔄</div>
-                  <div className="text-sm font-medium">重启设备</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors">
-                  <div className="text-2xl mb-2">📱</div>
-                  <div className="text-sm font-medium">截屏</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors">
-                  <div className="text-2xl mb-2">🎥</div>
-                  <div className="text-sm font-medium">录屏</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors">
-                  <div className="text-2xl mb-2">📊</div>
-                  <div className="text-sm font-medium">系统日志</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </ScrollArea>
