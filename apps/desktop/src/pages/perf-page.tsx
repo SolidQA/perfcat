@@ -1,15 +1,31 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChartList, ChartItem } from "@/components/charts/ChartList"
 import { useMonitoringStore } from "@/stores/use-monitoring-store"
-import { Cpu, Gauge, Zap, Database, ArrowUpDown } from "lucide-react"
+import { useDeviceStore } from "@/stores/use-device-store"
+import { useAdbApps } from "@/hooks/queries/useAdbApps"
+import { Cpu, Gauge, Zap, Database, ArrowUpDown, Smartphone } from "lucide-react"
 
 export function PerfPage() {
-  const { chartData, selectedMetrics } = useMonitoringStore()
+  const { chartData, selectedMetrics, selectedApp } = useMonitoringStore()
+  const { selectedDevice } = useDeviceStore()
+  const { apps } = useAdbApps(selectedDevice?.id || null)
+
+  // 获取当前测试应用的显示信息
+  const currentApp = apps.find(app => app.package === selectedApp)
+  const appDisplayName = currentApp?.label || selectedApp || "未选择应用"
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-2">
-        <h3 className="text-sm font-semibold">性能图表</h3>
+    <div className="h-full flex flex-col">
+      {/* 当前测试应用信息 - 固定在顶部 */}
+      <div className="flex items-center gap-2 p-4 pb-2 border-b bg-background">
+        <Smartphone size={14} className="text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">测试应用:</span>
+        <span className="text-sm font-medium">{appDisplayName}</span>
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-2">
+          <h3 className="text-sm font-semibold">性能图表</h3>
         <ChartList initialBrush={{ start: 0, end: 100 }}>
           {selectedMetrics.includes("cpu") && (
             <ChartItem
@@ -75,8 +91,9 @@ export function PerfPage() {
               ]}
             />
           )}
-        </ChartList>
-      </div>
-    </ScrollArea>
+          </ChartList>
+        </div>
+      </ScrollArea>
+    </div>
   )
 }
