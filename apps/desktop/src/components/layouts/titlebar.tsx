@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react"
 import { getCurrentWindow } from "@tauri-apps/api/window"
-import { open } from "@tauri-apps/plugin-shell"
-import { Minus, Maximize2, X, Moon, Sun } from "lucide-react"
+import { Minus, Maximize2, X, Moon, Sun, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getPlatform } from "@/lib/platform"
+import { getPlatform, openExternalUrl } from "@/lib/platform"
 import { useAppStore } from "@/stores/use-app-store"
 import { useDeviceStore } from "@/stores/use-device-store"
 import { useUpdateCheck } from "@/hooks/queries/useUpdateCheck"
+import { SettingsDialog } from "@/components/settings/SettingsDialog"
 
 const appWindow = getCurrentWindow()
 
 export function TitleBar() {
   const [platform, setPlatform] = useState<"macos" | "windows" | "linux">("macos")
+  const [showSettings, setShowSettings] = useState(false)
   const { theme, setTheme } = useAppStore()
   const { selectedDevice } = useDeviceStore()
   const version = __APP_VERSION__
@@ -100,7 +101,7 @@ export function TitleBar() {
               data-tauri-drag-region="false"
               onClick={() => {
                 if (update.releaseUrl) {
-                  open(update.releaseUrl)
+                  openExternalUrl(update.releaseUrl)
                 }
               }}
             >
@@ -108,6 +109,15 @@ export function TitleBar() {
             </button>
           ) : null}
         </div>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-5 w-5 rounded-sm"
+          onClick={() => setShowSettings(true)}
+          title="设置"
+        >
+          <Settings className="h-3.5 w-3.5" />
+        </Button>
         <Button
           variant="ghost"
           size="icon-sm"
@@ -145,6 +155,8 @@ export function TitleBar() {
           </>
         )}
       </div>
+
+      <SettingsDialog open={showSettings} onOpenChange={setShowSettings} />
     </div>
   )
 }
