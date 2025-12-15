@@ -69,10 +69,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Update Tauri config version
+        run: |
+          jq --arg version "${{ needs.prepare.outputs.version }}" '.version = $version' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp
+          mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
+          sed -i.bak "s/^version = \".*\"/version = \"${{ needs.prepare.outputs.version }}\"/" src-tauri/Cargo.toml
+
       - name: Build (tauri)
         working-directory: apps/desktop
         env:
-          TAURI_BUILD_VERSION: ${{ needs.prepare.outputs.version }}
+          TAURI_CONFIG_VERSION: ${{ needs.prepare.outputs.version }}
           VITE_APP_VERSION: ${{ needs.prepare.outputs.version }}
           TAURI_BUILD_NUMBER: ${{ github.run_number }}
           # 注释掉签名相关环境变量，因为还没有证书

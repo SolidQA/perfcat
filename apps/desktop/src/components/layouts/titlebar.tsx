@@ -79,8 +79,17 @@ export function TitleBar() {
 
       {/* 右侧：操作按钮和 Windows 窗口控制按钮 */}
       <div className="flex items-center gap-1.5 pr-2" data-tauri-drag-region="no-drag">
-        <div className="mr-1 flex items-center gap-1 text-xs text-foreground/60 select-none" data-tauri-drag-region>
-          <span title={`当前版本 v${version}`} data-tauri-drag-region className="pointer-events-none">{version}</span>
+        <div
+          className="mr-1 flex items-center gap-1 text-xs text-foreground/60 select-none"
+          data-tauri-drag-region
+        >
+          <span
+            title={`当前版本 v${version}`}
+            data-tauri-drag-region
+            className="pointer-events-none"
+          >
+            {version}
+          </span>
           {update.hasUpdate ? (
             <button
               type="button"

@@ -194,7 +194,7 @@ export function HomePage() {
         ].slice(-600)
       )
     }
-  }, [metrics])
+  }, [metrics, running])
 
   const chartData = useMemo(() => history, [history])
 
