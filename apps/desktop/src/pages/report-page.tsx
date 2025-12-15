@@ -14,6 +14,7 @@ import { useDeleteReport } from "@/hooks/mutations/useReports"
 import { ReportDetailPage } from "@/pages/report-detail-page"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 export function ReportPage() {
   const [viewMode, setViewMode] = useState<"list" | "detail">("list")
@@ -33,9 +34,8 @@ export function ReportPage() {
 
   const handleDelete = (e: React.MouseEvent, reportId: number) => {
     e.stopPropagation()
-    if (confirm("确定要删除此报告吗？")) {
-      deleteReport.mutate(reportId)
-    }
+    deleteReport.mutate(reportId)
+    toast.success("报告已删除")
   }
 
   const formatDuration = (seconds: number) => {
